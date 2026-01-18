@@ -94,19 +94,21 @@ const certificationSchema = z.object({
   issuer: z.string(),
 });
 
-const achievementSchema = z.object({
-  point: z.string().min(1, "Achievement can't be empty"),
+const pointSchema = z.object({
+  point: z.string().min(1, "Point can't be empty"),
 });
 
 
 const resumeSchema = z.object({
   header: headerSchema,
+  summary: z.string(),
   education: z.array(educationSchema),
   skills: skillsSchema,
   experience: z.array(experienceSchema),
   projects: z.array(projectSchema),
   certifications: z.array(certificationSchema),
-  achievements: z.array(achievementSchema),
+  achievements: z.array(pointSchema),
+  extraActivities: z.array(pointSchema),
 });
 
 type ResumeData = z.infer<typeof resumeSchema>;
@@ -122,6 +124,7 @@ const defaultValues: ResumeData = {
     github: 'https://github.com/hemadri138',
     portfolio: 'https://hemadri-kurukuti-portfolioweb.netlify.app/',
   },
+  summary: 'Frontend Engineer with 3.6+ years of consulting and enterprise delivery experience building scalable, high-quality frontend\napplications. Strong foundation in Angular fundamentals, TypeScript, HTML5, CSS3, RxJS concepts, and modern UI\nengineering practices. Proven ability to own deliverables end-to-end, collaborate with business stakeholders, mentor junior\ndevelopers, and ship production-ready interfaces in CI/CD-driven environments.',
   education: [
     {
       degree: 'Post Graduation',
@@ -183,14 +186,23 @@ const defaultValues: ResumeData = {
   achievements: [
       { point: 'Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013' },
       { point: 'Achieved AIR 8847 in GATE (Civil Engineering) | 2020' },
+  ],
+  extraActivities: [
       { point: 'Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.' },
       { point: 'Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.' },
   ],
 };
 
-const DYNAMIC_SECTIONS: (keyof Omit<ResumeData, "header" | "achievements" | "certifications">)[] = ['education', 'skills', 'experience', 'projects'];
-const STATIC_SECTIONS: (keyof Omit<ResumeData, "header" | "education" | "skills" | "experience" | "projects">)[] = ['certifications', 'achievements'];
-const orderedSections = [...DYNAMIC_SECTIONS, ...STATIC_SECTIONS];
+const orderedSections: (keyof Omit<ResumeData, 'header'>)[] = [
+  'summary',
+  'education',
+  'skills',
+  'experience',
+  'projects',
+  'certifications',
+  'achievements',
+  'extraActivities'
+];
 
 export default function ResumeForgePage() {
   const { toast } = useToast();
@@ -211,6 +223,7 @@ export default function ResumeForgePage() {
   const { fields: certificationFields, append: appendCertification, remove: removeCertification } = useFieldArray({ control: form.control, name: "certifications" });
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control: form.control, name: "skills" });
   const { fields: achievementFields, append: appendAchievement, remove: removeAchievement } = useFieldArray({ control: form.control, name: "achievements" });
+  const { fields: extraActivityFields, append: appendExtraActivity, remove: removeExtraActivity } = useFieldArray({ control: form.control, name: "extraActivities" });
 
 
   const watchedData = form.watch();
@@ -257,6 +270,25 @@ export default function ResumeForgePage() {
   };
   
   const sectionFormMap: Record<keyof Omit<ResumeData, "header">, React.ReactNode> = {
+    summary: (
+      <AccordionItem value="summary" key="summary">
+        <AccordionTrigger className="font-headline text-lg">Summary</AccordionTrigger>
+        <AccordionContent>
+          <FormField
+            control={form.control}
+            name="summary"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Textarea {...field} placeholder="Write a brief summary about yourself..." rows={7} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </AccordionContent>
+      </AccordionItem>
+    ),
     education: (
       <AccordionItem value="education" key="education">
         <AccordionTrigger className="font-headline text-lg">Education</AccordionTrigger>
@@ -417,9 +449,47 @@ export default function ResumeForgePage() {
         </AccordionContent>
       </AccordionItem>
     ),
+    extraActivities: (
+      <AccordionItem value="extraActivities" key="extraActivities">
+       <AccordionTrigger className="font-headline text-lg">Extra Activities</AccordionTrigger>
+       <AccordionContent className="space-y-4">
+           {extraActivityFields.map((field, index) => (
+             <Card key={field.id}>
+               <CardHeader className="flex flex-row items-center justify-between">
+                 <CardTitle className="text-base">Activity {index + 1}</CardTitle>
+                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeExtraActivity(index)}><Trash2 size={16} /></Button>
+               </CardHeader>
+               <CardContent>
+                   <FormField
+                     control={form.control}
+                     name={`extraActivities.${index}.point`}
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormControl>
+                           <Textarea {...field} placeholder="e.g., Member of the university coding club" />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
+               </CardContent>
+             </Card>
+           ))}
+         <Button variant="outline" size="sm" onClick={() => appendExtraActivity({ point: "" })}><Plus className="mr-2 h-4 w-4" /> Add Activity</Button>
+       </AccordionContent>
+     </AccordionItem>
+   ),
   };
 
   const sectionPreviewMap: Record<keyof Omit<ResumeData, "header">, React.ReactNode> = {
+    summary: watchedData.summary && (
+      <section key="summary">
+        <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Summary</h2>
+        <div className="prose-styles text-sm">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{watchedData.summary}</ReactMarkdown>
+        </div>
+      </section>
+    ),
     education: watchedData.education?.length > 0 && (
       <section key="education">
         <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Education</h2>
@@ -491,6 +561,23 @@ export default function ResumeForgePage() {
         <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Achievements</h2>
         <ul className="list-disc list-inside text-sm prose-styles">
           {watchedData.achievements.map((ach, i) => ach.point.trim() && (
+            <li key={i}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{ p: "span" }}
+                >
+                  {ach.point}
+                </ReactMarkdown>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ),
+    extraActivities: watchedData.extraActivities?.length > 0 && (
+      <section key="extraActivities">
+        <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Extra Activities</h2>
+        <ul className="list-disc list-inside text-sm prose-styles">
+          {watchedData.extraActivities.map((ach, i) => ach.point.trim() && (
             <li key={i}>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
