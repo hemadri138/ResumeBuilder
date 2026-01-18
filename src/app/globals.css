@@ -89,6 +89,9 @@ body {
 
 @layer utilities {
   @media print {
+    @page {
+      margin: 0;
+    }
     .print-hidden {
       display: none;
     }
@@ -108,6 +111,7 @@ body {
       margin: 0;
       padding: 2rem;
       color: black;
+      box-shadow: none !important;
     }
     .print-visible .text-muted-foreground {
       color: #4a5568;

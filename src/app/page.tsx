@@ -106,9 +106,9 @@ const defaultValues: ResumeData = {
     location: 'Bengaluru, India',
     phone: '+91-6302539492',
     email: 'hemadri1316@gmail.com',
-    linkedin: '',
-    github: '',
-    portfolio: '',
+    linkedin: 'http://www.linkedin.com/in/hemadri-kurukuti',
+    github: 'https://github.com/hemadri138',
+    portfolio: 'https://hemadri-kurukuti-portfolioweb.netlify.app/',
   },
   education: [
     {
