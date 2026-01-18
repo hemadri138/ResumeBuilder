@@ -492,7 +492,12 @@ export default function ResumeForgePage() {
         <ul className="list-disc list-inside text-sm prose-styles">
           {watchedData.achievements.map((ach, i) => ach.point.trim() && (
             <li key={i}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{ach.point}</ReactMarkdown>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{ p: "span" }}
+                >
+                  {ach.point}
+                </ReactMarkdown>
             </li>
           ))}
         </ul>
