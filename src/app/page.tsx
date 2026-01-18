@@ -83,9 +83,10 @@ const certificationSchema = z.object({
   issuer: z.string(),
 });
 
-const achievementsSchema = z.object({
-  points: z.string(),
+const achievementSchema = z.object({
+  point: z.string().min(1, "Achievement can't be empty"),
 });
+
 
 const resumeSchema = z.object({
   header: headerSchema,
@@ -94,7 +95,7 @@ const resumeSchema = z.object({
   experience: z.array(experienceSchema),
   projects: z.array(projectSchema),
   certifications: z.array(certificationSchema),
-  achievements: achievementsSchema,
+  achievements: z.array(achievementSchema),
 });
 
 type ResumeData = z.infer<typeof resumeSchema>;
@@ -165,10 +166,12 @@ const defaultValues: ResumeData = {
     { name: 'AZ104 - Azure Administrator Associate', issuer: '' },
     { name: 'AI102 - Azure Data Engineer Associate', issuer: '' },
   ],
-  achievements: {
-    points:
-      '- Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013\n- Achieved AIR 8847 in GATE (Civil Engineering) | 2020\n- Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.\n- Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.',
-  },
+  achievements: [
+      { point: 'Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013' },
+      { point: 'Achieved AIR 8847 in GATE (Civil Engineering) | 2020' },
+      { point: 'Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.' },
+      { point: 'Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.' },
+  ],
 };
 
 const DYNAMIC_SECTIONS: (keyof Omit<ResumeData, "header" | "achievements" | "certifications">)[] = ['education', 'skills', 'experience', 'projects'];
@@ -189,6 +192,7 @@ export default function ResumeForgePage() {
   const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({ control: form.control, name: "projects" });
   const { fields: certificationFields, append: appendCertification, remove: removeCertification } = useFieldArray({ control: form.control, name: "certifications" });
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control: form.control, name: "skills" });
+  const { fields: achievementFields, append: appendAchievement, remove: removeAchievement } = useFieldArray({ control: form.control, name: "achievements" });
 
 
   const watchedData = form.watch();
@@ -372,11 +376,33 @@ export default function ResumeForgePage() {
     achievements: (
        <AccordionItem value="achievements" key="achievements">
         <AccordionTrigger className="font-headline text-lg">Achievements / Highlights</AccordionTrigger>
-        <AccordionContent>
-          <FormField control={form.control} name="achievements.points" render={({ field }) => <FormItem><FormLabel>Highlights</FormLabel><FormControl><Textarea {...field} placeholder="Use bullet points, one per line" /></FormControl></FormItem>} />
+        <AccordionContent className="space-y-4">
+            {achievementFields.map((field, index) => (
+              <Card key={field.id}>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-base">Highlight {index + 1}</CardTitle>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeAchievement(index)}><Trash2 size={16} /></Button>
+                </CardHeader>
+                <CardContent>
+                    <FormField
+                      control={form.control}
+                      name={`achievements.${index}.point`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea {...field} placeholder="e.g., Won first place in hackathon" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </CardContent>
+              </Card>
+            ))}
+          <Button variant="outline" size="sm" onClick={() => appendAchievement({ point: "" })}><Plus className="mr-2 h-4 w-4" /> Add Highlight</Button>
         </AccordionContent>
       </AccordionItem>
-    )
+    ),
   };
 
   const sectionPreviewMap: Record<keyof Omit<ResumeData, "header">, React.ReactNode> = {
@@ -444,11 +470,11 @@ export default function ResumeForgePage() {
         </ul>
       </section>
     ),
-    achievements: watchedData.achievements?.points && (
+    achievements: watchedData.achievements?.length > 0 && (
       <section key="achievements">
         <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Achievements</h2>
         <ul className="list-disc list-inside text-sm">
-          {watchedData.achievements.points.split('\n').map((line, j) => line.trim() && <li key={j}>{line.replace(/^- /, '')}</li>)}
+          {watchedData.achievements.map((ach, i) => ach.point.trim() && <li key={i}>{ach.point}</li>)}
         </ul>
       </section>
     ),
@@ -519,3 +545,5 @@ export default function ResumeForgePage() {
     </main>
   );
 }
+
+    
