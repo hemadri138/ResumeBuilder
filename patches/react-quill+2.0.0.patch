@@ -1,13 +1,15 @@
-patch-package
+diff --git a/node_modules/react-quill/package.json b/node_modules/react-quill/package.json
+index 5854346..5a01cb7 100644
 --- a/node_modules/react-quill/package.json
 +++ b/node_modules/react-quill/package.json
-@@ -62,8 +62,8 @@
+@@ -86,8 +86,8 @@
+     "quill": ">=1.3.6 <2.0.0"
+   },
    "peerDependencies": {
-     "prop-types": "^15.7.2",
 -    "react": "^16 || ^17 || ^18",
 -    "react-dom": "^16 || ^17 || ^18"
 +    "react": "^16 || ^17 || ^18 || ^19",
 +    "react-dom": "^16 || ^17 || ^18 || ^19"
    },
-   "devDependencies": {
-     "@babel/cli": "^7.15.7",
+   "prettier": {
+     "singleQuote": true,
