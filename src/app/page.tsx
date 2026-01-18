@@ -15,6 +15,8 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +47,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { getAtsSuggestionsAction } from "./actions";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 // Zod Schemas for validation
 const headerSchema = z.object({
@@ -152,20 +153,23 @@ const defaultValues: ResumeData = {
       company: 'PwC India',
       duration: 'Apr 2025 - Present',
       responsibilities:
-        '<ul><li>Developed and deployed secure, scalable enterprise mobility solutions using React, React Native, C# .NET, and AWS, reducing internal sales/service response time by 40%, with direct accountability for technical direction, architectural decisions, and stakeholder alignment.</li><li>Led client interactions as the front-end lead, gathering business requirements and delivering tailored technical solutions using JavaScript, RESTful APIs, and cross-browser web technologies, improving system efficiency by 25%.</li></ul>',
+        `* Developed and deployed secure, scalable enterprise mobility solutions using React, React Native, C# .NET, and AWS, reducing internal sales/service response time by 40%, with direct accountability for technical direction, architectural decisions, and stakeholder alignment.
+* Led client interactions as the front-end lead, gathering business requirements and delivering tailored technical solutions using JavaScript, RESTful APIs, and cross-browser web technologies, improving system efficiency by 25%.`,
     },
     {
       title: 'Associate',
       company: 'PwC India',
       duration: 'July 2022 - March 2025',
       responsibilities:
-        '<ul><li>Migrated 20+ Node.js microservices to latest architecture using QuickSuite, integrated SonarQube for static code writing test cases for each service with minimum 80% code coverage.</li><li>Built a multi-channel e-commerce platform (D2C, B2B, B2C) with React, React Native, and Redux, implementing secure payment gateways (PayU), and leveraging Azure DevOps for CI/CD pipeline and cloud deployment.</li><li>Delivered 3+ enterprise web and mobile applications, reducing deployment time by 30% and resulting client satisfaction through improved UI/UX with enhanced system efficiency and security compliance reviews, ensuring alignment with OWASP practices and enterprise-grade protocols (HTTP, TCP/IP).</li></ul>',
+        `* Migrated 20+ Node.js microservices to latest architecture using QuickSuite, integrated SonarQube for static code writing test cases for each service with minimum 80% code coverage.
+* Built a multi-channel e-commerce platform (D2C, B2B, B2C) with React, React Native, and Redux, implementing secure payment gateways (PayU), and leveraging Azure DevOps for CI/CD pipeline and cloud deployment.
+* Delivered 3+ enterprise web and mobile applications, reducing deployment time by 30% and resulting client satisfaction through improved UI/UX with enhanced system efficiency and security compliance reviews, ensuring alignment with OWASP practices and enterprise-grade protocols (HTTP, TCP/IP).`,
     },
   ],
   projects: [
     {
       name: 'Habit & Expense Tracker App',
-      description: '<p>Built and published the apps on the Google Play Store.</p><p>Designed and developed cross-platform mobile apps (Expo, React Native) with offline storage using AsyncStorage.</p>',
+      description: 'Built and published the apps on the Google Play Store.\n\nDesigned and developed cross-platform mobile apps (Expo, React Native) with offline storage using AsyncStorage.',
       techStack: 'Expo, React Native, AsyncStorage',
     },
   ],
@@ -177,10 +181,10 @@ const defaultValues: ResumeData = {
     { name: 'AI102 - Azure Data Engineer Associate', issuer: '' },
   ],
   achievements: [
-      { point: '<p>Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013</p>' },
-      { point: '<p>Achieved AIR 8847 in GATE (Civil Engineering) | 2020</p>' },
-      { point: '<p>Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.</p>' },
-      { point: '<p>Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.</p>' },
+      { point: 'Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013' },
+      { point: 'Achieved AIR 8847 in GATE (Civil Engineering) | 2020' },
+      { point: 'Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.' },
+      { point: 'Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.' },
   ],
 };
 
@@ -334,7 +338,7 @@ export default function ResumeForgePage() {
                 <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => <FormItem><FormLabel>Job Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => <FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 <FormField control={form.control} name={`experience.${index}.duration`} render={({ field }) => <FormItem><FormLabel>Duration</FormLabel><FormControl><Input {...field} placeholder="e.g., Jan 2022 - Present"/></FormControl></FormItem>} />
-                <FormField control={form.control} name={`experience.${index}.responsibilities`} render={({ field }) => <FormItem><FormLabel>Responsibilities</FormLabel><FormControl><RichTextEditor {...field} placeholder="Describe your responsibilities..." /></FormControl></FormItem>} />
+                <FormField control={form.control} name={`experience.${index}.responsibilities`} render={({ field }) => <FormItem><FormLabel>Responsibilities</FormLabel><FormControl><Textarea {...field} placeholder="Describe your responsibilities... (Markdown supported)" rows={5} /></FormControl></FormItem>} />
               </CardContent>
             </Card>
           ))}
@@ -354,7 +358,7 @@ export default function ResumeForgePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-                <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><RichTextEditor {...field} /></FormControl></FormItem>} />
+                <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} placeholder="Describe your project... (Markdown supported)" rows={4} /></FormControl></FormItem>} />
                 <FormField control={form.control} name={`projects.${index}.techStack`} render={({ field }) => <FormItem><FormLabel>Tech Stack</FormLabel><FormControl><Input {...field} placeholder="Comma-separated" /></FormControl></FormItem>} />
               </CardContent>
             </Card>
@@ -400,7 +404,7 @@ export default function ResumeForgePage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <RichTextEditor {...field} placeholder="e.g., Won first place in hackathon" />
+                            <Textarea {...field} placeholder="e.g., Won first place in hackathon (Markdown supported)" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -451,7 +455,9 @@ export default function ResumeForgePage() {
                 <h3 className="font-bold text-base">{exp.title} at {exp.company}</h3>
                 <p className="text-sm text-muted-foreground">{exp.duration}</p>
               </div>
-              <div className="prose-styles" dangerouslySetInnerHTML={{ __html: exp.responsibilities }} />
+              <div className="prose-styles text-sm">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{exp.responsibilities}</ReactMarkdown>
+              </div>
           </div>
         ))}
       </section>
@@ -462,7 +468,9 @@ export default function ResumeForgePage() {
         {watchedData.projects.map((proj, i) => (
            <div key={i} className="mb-3">
              <h3 className="font-bold text-base">{proj.name}</h3>
-             <div className="text-sm prose-styles" dangerouslySetInnerHTML={{ __html: proj.description }} />
+             <div className="text-sm prose-styles">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{proj.description}</ReactMarkdown>
+             </div>
              <p className="text-sm"><strong>Tech Stack:</strong> {proj.techStack}</p>
            </div>
         ))}
@@ -482,9 +490,9 @@ export default function ResumeForgePage() {
       <section key="achievements">
         <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Achievements</h2>
         <ul className="list-disc list-inside text-sm prose-styles">
-          {watchedData.achievements.map((ach, i) => ach.point.replace(/<[^>]*>?/gm, '').trim() && (
+          {watchedData.achievements.map((ach, i) => ach.point.trim() && (
             <li key={i}>
-                <div dangerouslySetInnerHTML={{ __html: ach.point }}/>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{ach.point}</ReactMarkdown>
             </li>
           ))}
         </ul>
