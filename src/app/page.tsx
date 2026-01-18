@@ -117,7 +117,7 @@ const defaultValues: ResumeData = {
       specialization: 'Marine Structures',
       institute: 'NITK Surathkal',
       year: '2022',
-      gpa: '8.31 CPI',
+      gpa: '8.31',
     },
     {
       degree: 'Graduation',
@@ -125,7 +125,7 @@ const defaultValues: ResumeData = {
       specialization: 'Civil Engineering',
       institute: 'JNTUA, Pulivendula',
       year: '2020',
-      gpa: '8.82 CPI',
+      gpa: '8.82',
     },
   ],
   skills: {
@@ -420,7 +420,7 @@ export default function ResumeForgePage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <div className="p-4 md:p-8 md:overflow-y-auto md:h-screen">
+        <div className="p-4 md:p-8 md:overflow-y-auto md:h-screen print-hidden">
           <header className="mb-8">
             <h1 className="font-headline text-3xl font-bold text-primary">ResumeForge</h1>
             <p className="text-muted-foreground">Fill in your details and see your resume come to life.</p>
@@ -457,7 +457,7 @@ export default function ResumeForgePage() {
           </Form>
         </div>
 
-        <div className="bg-gray-300 p-4 md:p-8 print-hidden md:overflow-y-auto md:h-screen">
+        <div className="bg-gray-300 p-4 md:p-8 md:overflow-y-auto md:h-screen">
           <div className="bg-white shadow-2xl rounded-lg p-8 mx-auto max-w-4xl aspect-[8.5/11] print-visible" id="resume-preview">
             {/* Resume Preview */}
             <header className="text-center mb-6">
