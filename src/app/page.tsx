@@ -101,52 +101,71 @@ type ResumeData = z.infer<typeof resumeSchema>;
 
 const defaultValues: ResumeData = {
   header: {
-    name: "John Doe",
-    role: "Frontend Engineer – React & Next.js",
-    location: "San Francisco, CA",
-    phone: "123-456-7890",
-    email: "john.doe@email.com",
-    linkedin: "https://linkedin.com/in/johndoe",
-    github: "https://github.com/johndoe",
-    portfolio: "https://johndoe.dev",
+    name: 'Hemadri Kurukuti',
+    role: 'Full Stack Developer',
+    location: 'Bengaluru, India',
+    phone: '+91-6302539492',
+    email: 'hemadri1316@gmail.com',
+    linkedin: '',
+    github: '',
+    portfolio: '',
   },
   education: [
     {
-      degree: "Bachelor of Technology",
-      university: "State University",
-      specialization: "Computer Science",
-      institute: "School of Engineering",
-      year: "2018-2022",
-      gpa: "3.8/4.0",
+      degree: 'Post Graduation',
+      university: 'NITK Surathkal',
+      specialization: 'Marine Structures',
+      institute: 'NITK Surathkal',
+      year: '2022',
+      gpa: '8.31 CPI',
+    },
+    {
+      degree: 'Graduation',
+      university: 'JNTUA, Anantapur',
+      specialization: 'Civil Engineering',
+      institute: 'JNTUA, Pulivendula',
+      year: '2020',
+      gpa: '8.82 CPI',
     },
   ],
   skills: {
-    frontend:
-      "React, Next.js, TypeScript, JavaScript (ES6+), HTML5, CSS3, Tailwind CSS",
-    architecture: "State Management (Redux, Zustand), Component-driven design",
-    cloud: "Vercel, Firebase, AWS (S3, CloudFront)",
+    frontend: 'AngularJS, ReactJs, NextJs, Vite, Expo, React Native, JavaScript (ES6+), TypeScript, HTML5, CSS3',
+    architecture: 'Node.js, C# .NET, RESTful APIs, PostgreSQL, Express.js, NPM, Python, PostgreSQL, MySQL, MongoDB, Postman, Swagger, Unit & Integration Testing',
+    cloud: 'AWS (Amplify, Cognito, EC2), Azure DevOps, CI/CD Pipelines, Git',
   },
   experience: [
     {
-      title: "Senior Frontend Engineer",
-      company: "Tech Corp",
-      duration: "Jan 2022 - Present",
+      title: 'Senior Associate',
+      company: 'PwC India',
+      duration: 'Apr 2025 - Present',
       responsibilities:
-        "- Led development of a new design system.\n- Improved page load speed by 30%.",
+        '- Developed and deployed secure, scalable enterprise mobility solutions using React, React Native, C# .NET, and AWS, reducing internal sales/service response time by 40%, with direct accountability for technical direction, architectural decisions, and stakeholder alignment.\n- Led client interactions as the front-end lead, gathering business requirements and delivering tailored technical solutions using JavaScript, RESTful APIs, and cross-browser web technologies, improving system efficiency by 25%.',
+    },
+    {
+      title: 'Associate',
+      company: 'PwC India',
+      duration: 'July 2022 - March 2025',
+      responsibilities:
+        '- Migrated 20+ Node.js microservices to latest architecture using QuickSuite, integrated SonarQube for static code writing test cases for each service with minimum 80% code coverage.\n- Built a multi-channel e-commerce platform (D2C, B2B, B2C) with React, React Native, and Redux, implementing secure payment gateways (PayU), and leveraging Azure DevOps for CI/CD pipeline and cloud deployment.\n- Delivered 3+ enterprise web and mobile applications, reducing deployment time by 30% and resulting client satisfaction through improved UI/UX with enhanced system efficiency and security compliance reviews, ensuring alignment with OWASP practices and enterprise-grade protocols (HTTP, TCP/IP).',
     },
   ],
   projects: [
     {
-      name: "Personal Portfolio",
-      description: "A showcase of my projects and skills.",
-      techStack: "Next.js, Tailwind CSS, Vercel",
+      name: 'Habit & Expense Tracker App',
+      description: 'Built and published the apps on the Google Play Store.\nDesigned and developed cross-platform mobile apps (Expo, React Native) with offline storage using AsyncStorage.',
+      techStack: 'Expo, React Native, AsyncStorage',
     },
   ],
   certifications: [
-    { name: "Certified React Developer", issuer: "React Association" },
+    { name: 'PL900 - Power Platform Fundamentals', issuer: '' },
+    { name: 'AZ900 - Azure Fundamentals', issuer: '' },
+    { name: 'AZ204 - Azure Developer Associate', issuer: '' },
+    { name: 'AZ104 - Azure Administrator Associate', issuer: '' },
+    { name: 'AI102 - Azure Data Engineer Associate', issuer: '' },
   ],
   achievements: {
-    points: "- Won company-wide hackathon.\n- Speaker at local tech meetup.",
+    points:
+      '- Awarded NMMS Scholarship by DSEL, GoI (Top 1% in state) | 2013\n- Achieved AIR 8847 in GATE (Civil Engineering) | 2020\n- Deployed apps on Google Play Store, managing testing and releases and contributed to peer code reviews and best practices, ensuring clean, scalable, and maintainable code.\n- Explored and utilised AI agents and automation workflows, with real-world use cases for productivity.',
   },
 };
 
