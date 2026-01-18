@@ -5,7 +5,6 @@ import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  ChevronsUpDown,
   Download,
   Github,
   Globe,
@@ -59,11 +58,12 @@ const educationSchema = z.object({
   gpa: z.string(),
 });
 
-const skillsSchema = z.object({
-  frontend: z.string(),
-  architecture: z.string(),
-  cloud: z.string(),
+const skillCategorySchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+  keywords: z.string(),
 });
+
+const skillsSchema = z.array(skillCategorySchema);
 
 const experienceSchema = z.object({
   title: z.string().min(1, "Job title is required"),
@@ -128,11 +128,13 @@ const defaultValues: ResumeData = {
       gpa: '8.82',
     },
   ],
-  skills: {
-    frontend: 'AngularJS, ReactJs, NextJs, Vite, Expo, React Native, JavaScript (ES6+), TypeScript, HTML5, CSS3',
-    architecture: 'Node.js, C# .NET, RESTful APIs, PostgreSQL, Express.js, NPM, Python, PostgreSQL, MySQL, MongoDB, Postman, Swagger, Unit & Integration Testing',
-    cloud: 'AWS (Amplify, Cognito, EC2), Azure DevOps, CI/CD Pipelines, Git',
-  },
+  skills: [
+    { name: 'Front-End', keywords: 'AngularJS, ReactJs, NextJs, Vite, Expo, React Native, JavaScript (ES6+), TypeScript, HTML5, CSS3' },
+    { name: 'Back-End', keywords: 'Node.js, C# .NET, RESTful APIs, PostgreSQL, Express.js, NPM, Python' },
+    { name: 'Cloud & DevOps', keywords: 'AWS (Amplify, Cognito, EC2), Azure DevOps, CI/CD Pipelines, Git' },
+    { name: 'Databases', keywords: 'PostgreSQL, MySQL, MongoDB' },
+    { name: 'Testing', keywords: 'Postman, Swagger, Unit & Integration Testing' },
+  ],
   experience: [
     {
       title: 'Senior Associate',
@@ -186,6 +188,8 @@ export default function ResumeForgePage() {
   const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({ control: form.control, name: "experience" });
   const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({ control: form.control, name: "projects" });
   const { fields: certificationFields, append: appendCertification, remove: removeCertification } = useFieldArray({ control: form.control, name: "certifications" });
+  const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control: form.control, name: "skills" });
+
 
   const watchedData = form.watch();
 
@@ -198,7 +202,7 @@ export default function ResumeForgePage() {
     const formData = form.getValues();
     const input = {
         education: JSON.stringify(formData.education),
-        skills: `${formData.skills.frontend}, ${formData.skills.architecture}, ${formData.skills.cloud}`,
+        skills: formData.skills.map(s => `${s.name}: ${s.keywords}`).join('\n'),
         experience: JSON.stringify(formData.experience),
         projects: JSON.stringify(formData.projects),
     };
@@ -263,9 +267,42 @@ export default function ResumeForgePage() {
       <AccordionItem value="skills" key="skills">
         <AccordionTrigger className="font-headline text-lg">Skills</AccordionTrigger>
         <AccordionContent className="space-y-4">
-          <FormField control={form.control} name="skills.frontend" render={({ field }) => <FormItem><FormLabel>Frontend Skills</FormLabel><FormControl><Textarea {...field} placeholder="Comma-separated skills" /></FormControl></FormItem>} />
-          <FormField control={form.control} name="skills.architecture" render={({ field }) => <FormItem><FormLabel>Architecture & Engineering</FormLabel><FormControl><Textarea {...field} placeholder="Comma-separated skills" /></FormControl></FormItem>} />
-          <FormField control={form.control} name="skills.cloud" render={({ field }) => <FormItem><FormLabel>Cloud & DevOps</FormLabel><FormControl><Textarea {...field} placeholder="Comma-separated skills" /></FormControl></FormItem>} />
+          {skillFields.map((field, index) => (
+            <Card key={field.id} className="relative">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-base">Category {index + 1}</CardTitle>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeSkill(index)}><Trash2 size={16} /></Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name={`skills.${index}.name`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Programming Languages" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`skills.${index}.keywords`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Skills</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder="Comma-separated skills" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          ))}
+          <Button variant="outline" size="sm" onClick={() => appendSkill({ name: "", keywords: "" })}><Plus className="mr-2 h-4 w-4" /> Add Skill Category</Button>
         </AccordionContent>
       </AccordionItem>
     ),
@@ -359,13 +396,13 @@ export default function ResumeForgePage() {
         ))}
       </section>
     ),
-    skills: (watchedData.skills.frontend || watchedData.skills.architecture || watchedData.skills.cloud) && (
+    skills: watchedData.skills?.length > 0 && (
       <section key="skills">
         <h2 className="font-headline text-xl font-bold border-b-2 border-primary/50 pb-1 mb-3">Skills</h2>
-        <div className="text-sm">
-          {watchedData.skills.frontend && <p><strong>Frontend:</strong> {watchedData.skills.frontend}</p>}
-          {watchedData.skills.architecture && <p><strong>Architecture:</strong> {watchedData.skills.architecture}</p>}
-          {watchedData.skills.cloud && <p><strong>Cloud/DevOps:</strong> {watchedData.skills.cloud}</p>}
+        <div className="text-sm space-y-1">
+          {watchedData.skills.map((skill, i) => (
+            skill.name && skill.keywords && <p key={i}><strong>{skill.name}:</strong> {skill.keywords}</p>
+          ))}
         </div>
       </section>
     ),
