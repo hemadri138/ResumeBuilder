@@ -1,12 +1,13 @@
+patch-package
 --- a/node_modules/react-quill/package.json
 +++ b/node_modules/react-quill/package.json
 @@ -62,8 +62,8 @@
-   },
    "peerDependencies": {
+     "prop-types": "^15.7.2",
 -    "react": "^16 || ^17 || ^18",
 -    "react-dom": "^16 || ^17 || ^18"
 +    "react": "^16 || ^17 || ^18 || ^19",
 +    "react-dom": "^16 || ^17 || ^18 || ^19"
    },
-   "optionalDependencies": {
-     "prop-types": "^15.6.2"
+   "devDependencies": {
+     "@babel/cli": "^7.15.7",
