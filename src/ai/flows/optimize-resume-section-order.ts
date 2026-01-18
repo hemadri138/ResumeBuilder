@@ -1,64 +1,69 @@
 'use server';
 
 /**
- * @fileOverview A Genkit flow to optimize the order of resume sections (Education, Skills, Experience, Projects) for better ATS and human readability.
+ * @fileOverview A Genkit flow to get ATS suggestions for a resume based on a job description.
  *
- * - optimizeResumeSectionOrder - A function that reorders the sections of a resume to optimize it for ATS and human readability.
- * - OptimizeResumeSectionOrderInput - The input type for the optimizeResumeSectionOrder function.
- * - OptimizeResumeSectionOrderOutput - The return type for the optimizeResumeSectionOrder function.
+ * - getAtsSuggestions - A function that gets ATS suggestions.
+ * - GetAtsSuggestionsInput - The input type for the getAtsSuggestions function.
+ * - GetAtsSuggestionsOutput - The return type for the getAtsSuggestions function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const OptimizeResumeSectionOrderInputSchema = z.object({
-  education: z.string().describe('The education section of the resume.'),
-  skills: z.string().describe('The skills section of the resume.'),
-  experience: z.string().describe('The work experience section of the resume.'),
-  projects: z.string().describe('The projects section of the resume.'),
+const GetAtsSuggestionsInputSchema = z.object({
+  resume: z.string().describe('The complete resume data in JSON format.'),
+  jobDescription: z
+    .string()
+    .describe('The job description to compare the resume against.'),
 });
-export type OptimizeResumeSectionOrderInput = z.infer<typeof OptimizeResumeSectionOrderInputSchema>;
+export type GetAtsSuggestionsInput = z.infer<
+  typeof GetAtsSuggestionsInputSchema
+>;
 
-const OptimizeResumeSectionOrderOutputSchema = z.object({
-  orderedSections: z
-    .array(z.string())
+const GetAtsSuggestionsOutputSchema = z.object({
+  suggestions: z
+    .string()
     .describe(
-      'An array of strings representing the reordered sections (education, skills, experience, projects) in the optimal order.'
+      'Actionable suggestions to improve the resume for the given job description, formatted as markdown. Include an estimated ATS score improvement.'
     ),
-  reasoning: z.string().describe('The reasoning behind the reordering of the resume sections.'),
 });
-export type OptimizeResumeSectionOrderOutput = z.infer<typeof OptimizeResumeSectionOrderOutputSchema>;
+export type GetAtsSuggestionsOutput = z.infer<
+  typeof GetAtsSuggestionsOutputSchema
+>;
 
-export async function optimizeResumeSectionOrder(
-  input: OptimizeResumeSectionOrderInput
-): Promise<OptimizeResumeSectionOrderOutput> {
-  return optimizeResumeSectionOrderFlow(input);
+export async function getAtsSuggestions(
+  input: GetAtsSuggestionsInput
+): Promise<GetAtsSuggestionsOutput> {
+  return getAtsSuggestionsFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'optimizeResumeSectionOrderPrompt',
-  input: {schema: OptimizeResumeSectionOrderInputSchema},
-  output: {schema: OptimizeResumeSectionOrderOutputSchema},
-  prompt: `You are an AI resume optimization expert. You will reorder the sections of a resume to optimize it for both Applicant Tracking Systems (ATS) and human readability.
+  name: 'getAtsSuggestionsPrompt',
+  input: {schema: GetAtsSuggestionsInputSchema},
+  output: {schema: GetAtsSuggestionsOutputSchema},
+  prompt: `You are an expert ATS resume reviewer and career coach. Your task is to analyze the provided resume against the given job description and provide actionable suggestions to improve its ATS score and overall effectiveness.
 
-  The available sections are Education, Skills, Experience, and Projects.
+    Resume (JSON format):
+    {{{resume}}}
 
-  Consider the content of each section when determining the optimal order.
+    Job Description:
+    {{{jobDescription}}}
 
-  Education: {{{education}}}
-  Skills: {{{skills}}}
-  Experience: {{{experience}}}
-  Projects: {{{projects}}}
-
-  Output an array containing the ordered sections, and reasoning for the new ordering. Do not include any sections other than Education, Skills, Experience and Projects.
-  `,
+    Please provide the following:
+    1.  A list of specific, actionable suggestions to improve the resume.
+    2.  Focus on incorporating relevant keywords from the job description into the resume's experience, skills, and projects sections.
+    3.  Suggest improvements to the bullet points in the experience section to better match the job requirements, using action verbs.
+    4.  Provide an estimated percentage improvement in the ATS score if the suggestions are applied.
+    5.  Format your entire response as a single markdown string in the 'suggestions' field.
+    `,
 });
 
-const optimizeResumeSectionOrderFlow = ai.defineFlow(
+const getAtsSuggestionsFlow = ai.defineFlow(
   {
-    name: 'optimizeResumeSectionOrderFlow',
-    inputSchema: OptimizeResumeSectionOrderInputSchema,
-    outputSchema: OptimizeResumeSectionOrderOutputSchema,
+    name: 'getAtsSuggestionsFlow',
+    inputSchema: GetAtsSuggestionsInputSchema,
+    outputSchema: GetAtsSuggestionsOutputSchema,
   },
   async input => {
     const {output} = await prompt(input);

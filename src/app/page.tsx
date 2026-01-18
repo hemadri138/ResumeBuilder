@@ -33,9 +33,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { getOptimalSectionOrder } from "./actions";
+import { getAtsSuggestionsAction } from "./actions";
 
 // Zod Schemas for validation
 const headerSchema = z.object({
@@ -176,11 +185,15 @@ const defaultValues: ResumeData = {
 
 const DYNAMIC_SECTIONS: (keyof Omit<ResumeData, "header" | "achievements" | "certifications">)[] = ['education', 'skills', 'experience', 'projects'];
 const STATIC_SECTIONS: (keyof Omit<ResumeData, "header" | "education" | "skills" | "experience" | "projects">)[] = ['certifications', 'achievements'];
+const orderedSections = [...DYNAMIC_SECTIONS, ...STATIC_SECTIONS];
 
 export default function ResumeForgePage() {
-  const [orderedSections, setOrderedSections] = useState<(keyof ResumeData)[]>([...DYNAMIC_SECTIONS, ...STATIC_SECTIONS]);
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const { toast } = useToast();
+  
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
+  const [suggestions, setSuggestions] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
@@ -201,44 +214,40 @@ export default function ResumeForgePage() {
     window.print();
   };
 
-  const handleOptimizeOrder = async () => {
+  const handleGetAtsSuggestions = async () => {
+    if (!jobDescription.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Job Description Required",
+        description: "Please paste a job description to get suggestions.",
+      });
+      return;
+    }
+
     setIsOptimizing(true);
+    setSuggestions(null);
     const formData = form.getValues();
     const input = {
-        education: JSON.stringify(formData.education),
-        skills: formData.skills.map(s => `${s.name}: ${s.keywords}`).join('\n'),
-        experience: JSON.stringify(formData.experience),
-        projects: JSON.stringify(formData.projects),
+      resume: JSON.stringify(formData),
+      jobDescription: jobDescription,
     };
-    
+
     try {
-        const result = await getOptimalSectionOrder(input);
+      const result = await getAtsSuggestionsAction(input);
 
-        if (result && 'orderedSections' in result) {
-            const newDynamicOrder = result.orderedSections
-              .map(s => s.toLowerCase())
-              .filter(s => DYNAMIC_SECTIONS.includes(s as any)) as (keyof ResumeData)[];
-            
-            const reordered = [...new Set([...newDynamicOrder, ...DYNAMIC_SECTIONS])];
-
-            setOrderedSections([...reordered, ...STATIC_SECTIONS]);
-
-            toast({
-                title: "✨ Sections Reordered by AI",
-                description: <p className="text-sm">{result.reasoning}</p>,
-                duration: 10000,
-            });
-        } else {
-            throw new Error(result.error || 'Unknown error occurred');
-        }
+      if (result && 'suggestions' in result) {
+        setSuggestions(result.suggestions);
+      } else {
+        throw new Error(result.error || 'Unknown error occurred');
+      }
     } catch (e: any) {
-        toast({
-            variant: "destructive",
-            title: "Optimization Failed",
-            description: e.message || "Could not reorder sections.",
-        });
+      toast({
+        variant: "destructive",
+        title: "Optimization Failed",
+        description: e.message || "Could not get suggestions.",
+      });
     } finally {
-        setIsOptimizing(false);
+      setIsOptimizing(false);
     }
   };
   
@@ -490,9 +499,57 @@ export default function ResumeForgePage() {
           </header>
 
           <div className="flex gap-2 mb-6 print-hidden">
-            <Button onClick={handleOptimizeOrder} disabled={isOptimizing}>
-              {isOptimizing ? "Optimizing..." : <><Sparkles className="mr-2 h-4 w-4" /> Optimize with AI</>}
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) {
+                    setSuggestions(null);
+                    setJobDescription("");
+                }
+            }}>
+                <DialogTrigger asChild>
+                    <Button>
+                        <Sparkles className="mr-2 h-4 w-4" /> Optimize with AI
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                        <DialogTitle>Optimize Resume for ATS</DialogTitle>
+                        <DialogDescription>
+                            Paste the job description below. The AI will analyze your resume and provide suggestions to improve your ATS score.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <Textarea 
+                            placeholder="Paste job description here..." 
+                            className="min-h-[200px]"
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                        />
+
+                        {isOptimizing && (
+                            <div className="flex items-center justify-center p-8">
+                                <p>Analyzing... this may take a moment.</p>
+                            </div>
+                        )}
+                        
+                        {suggestions && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>✨ AI Suggestions</CardTitle>
+                                </CardHeader>
+                                <CardContent className="max-h-[300px] overflow-y-auto">
+                                   <div className="text-sm p-4 bg-secondary rounded-md whitespace-pre-wrap font-sans">{suggestions}</div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleGetAtsSuggestions} disabled={isOptimizing}>
+                            {isOptimizing ? 'Analyzing...' : 'Get Suggestions'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <Button onClick={handlePrint} variant="outline">
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
@@ -545,5 +602,3 @@ export default function ResumeForgePage() {
     </main>
   );
 }
-
-    
